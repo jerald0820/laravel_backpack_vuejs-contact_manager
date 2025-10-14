@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Modules\ContactManager\Http\Controllers\Api\ContactController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,4 +16,11 @@ use Illuminate\Http\Request;
 
 Route::middleware('auth:api')->get('/contactmanager', function (Request $request) {
     return $request->user();
+});
+
+Route::prefix('contacts')->group(function(){
+    Route::get('/', [ContactController::class,'index']);
+    Route::post('/', [ContactController::class,'store']);
+    Route::get('{id}', [ContactController::class,'show']);
+    Route::delete('{id}', [ContactController::class,'destroy']);
 });
