@@ -9,6 +9,12 @@
       @submit.prevent="createContact"
       class="bg-white shadow-md rounded-lg p-6 mb-8 border border-gray-100"
     >
+      <div v-if="Object.keys(errors).length" class="mb-4 text-red-600">
+        <ul class="list-disc list-inside">
+          <li v-for="(err, key) in errors" :key="key">{{ err[0] }}</li>
+        </ul>
+      </div>
+
       <div class="grid gap-4 md:grid-cols-2 mb-4">
         <input
           v-model="form.name"
@@ -100,6 +106,7 @@ export default {
       form: { name: '', email: '' },
       file: null,
       preview: null,
+      errors: {}, // <-- Added for error messages
     };
   },
   mounted() {
@@ -122,20 +129,30 @@ export default {
       this.preview = null;
     },
     async createContact() {
+      this.errors = {}; // Clear previous errors
       const fd = new FormData();
       fd.append('name', this.form.name);
       fd.append('email', this.form.email);
       if (this.file) fd.append('image', this.file);
 
-      await axios.post('/api/contacts', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      try {
+        await axios.post('/api/contacts', fd, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
 
-      this.form.name = '';
-      this.form.email = '';
-      this.file = null;
-      this.preview = null;
-      await this.fetch();
+        this.form.name = '';
+        this.form.email = '';
+        this.file = null;
+        this.preview = null;
+        await this.fetch();
+      } catch (err) {
+        if (err.response && err.response.data && err.response.data.errors) {
+          this.errors = err.response.data.errors;
+        } else {
+          console.error(err);
+          this.errors.general = ['An unexpected error occurred.'];
+        }
+      }
     },
     async remove(id) {
       await axios.delete(`/api/contacts/${id}`);
