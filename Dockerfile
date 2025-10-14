@@ -2,7 +2,13 @@
 FROM composer:2.7 AS vendor
 
 WORKDIR /app
+# Copy composer files first (for caching)
 COPY composer.json composer.lock ./
+
+# Copy the rest of the Laravel app (including artisan)
+COPY . .
+
+# Now run composer install — artisan exists now
 RUN composer install --no-dev --optimize-autoloader
 
 # Stage 2: Build frontend assets using Node
