@@ -1,8 +1,10 @@
 services:
   - type: web
     name: laravel-contact-manager
+    env: php
     plan: free
     buildCommand: |
+      apt-get update && apt-get install -y nodejs npm
       composer install --no-dev --optimize-autoloader
       php artisan key:generate
       npm install
