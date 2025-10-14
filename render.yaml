@@ -1,14 +1,15 @@
 services:
   - type: web
     name: laravel-contact-manager
-    env: php
+    runtime: node
     plan: free
     buildCommand: |
-      apt-get update && apt-get install -y nodejs npm
+      apt-get update && apt-get install -y php php-cli php-mbstring php-xml php-bcmath php-zip php-sqlite3 unzip curl
+      curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
       composer install --no-dev --optimize-autoloader
-      php artisan key:generate
       npm install
       npm run build
+      php artisan key:generate
       touch database/database.sqlite
       php artisan migrate --force
     startCommand: php artisan serve --host 0.0.0.0 --port 10000
