@@ -27,7 +27,7 @@ class ContactController extends Controller
 {
     public function index()
     {
-        return JsonResource::collection(Contact::orderBy('created_at','desc')->get());
+        return ContactResource::collection(Contact::orderBy('created_at','desc')->get());
     }
 
     public function store(Request $request)
