@@ -65,4 +65,4 @@ RUN php artisan config:clear || true && php artisan route:clear || true && php a
 EXPOSE 80
 
 # On container start: generate key if missing, then start Apache
-CMD ["/bin/sh", "-c", "php artisan key:generate --force || true && php artisan migrate --force || true && apache2-foreground"]
+CMD ["/bin/sh", "-c", "php artisan key:generate --force || true && php artisan migrate --force || true && php artisan storage:link || true && apache2-foreground"]
