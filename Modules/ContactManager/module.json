@@ -1,0 +1,13 @@
+{
+    "name": "ContactManager",
+    "alias": "contactmanager",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ContactManager\\Providers\\ContactManagerServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
