@@ -1,33 +1,31 @@
-# Use official PHP 8.2 image with Node installed
-FROM php:8.2-fpm
+# Use official PHP 8.2 image with Node and Composer
+FROM php:8.2-cli
 
-# Install system dependencies
+# Install required system dependencies
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libonig-dev libxml2-dev npm sqlite3 \
-    && docker-php-ext-install pdo pdo_sqlite mbstring exif pcntl bcmath gd
-
-# Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+    git curl zip unzip libpng-dev libonig-dev libxml2-dev libsqlite3-dev pkg-config npm \
+    && docker-php-ext-install pdo pdo_sqlite mbstring exif pcntl bcmath gd \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy app files
+# Copy all project files
 COPY . .
 
-# Create .env file if not exists
+# Copy .env.example to .env if not exists
 RUN cp .env.example .env || true
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Install and build frontend (Vite + Vue)
+# Install frontend dependencies and build assets
 RUN npm install && npm run build
 
 # Generate Laravel app key
 RUN php artisan key:generate
 
-# Ensure SQLite DB exists
+# Ensure SQLite database file exists
 RUN mkdir -p database && touch database/database.sqlite
 
 # Run migrations
@@ -36,5 +34,5 @@ RUN php artisan migrate --force || true
 # Expose port 8000
 EXPOSE 8000
 
-# Start Laravel app
-CMD php artisan serve --host=0.0.0.0 --port=8000
+# Start the Laravel app
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
