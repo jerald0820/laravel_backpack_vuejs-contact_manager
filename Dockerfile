@@ -12,7 +12,7 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader
 
 # Stage 2: Build frontend assets using Node
-FROM node:18 AS frontend
+FROM node:20 AS frontend
 
 WORKDIR /app
 COPY package.json package-lock.json* ./
