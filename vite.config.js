@@ -10,4 +10,8 @@ export default defineConfig({
         }),
         vue(),
     ],
+    server: {
+        https: false, // Only matters for local dev
+    },
+    base: process.env.ASSET_URL ? process.env.ASSET_URL + '/' : '/',
 });
