@@ -27,43 +27,42 @@ RUN npm run build
 # ============================
 FROM php:8.2-apache
 
-# Install required PHP extensions
+# Install PHP extensions
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libpng-dev libonig-dev libxml2-dev libsqlite3-dev pkg-config \
     && docker-php-ext-install pdo pdo_sqlite mbstring exif pcntl bcmath gd \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Enable Laravel's required Apache modules
+# Enable Laravel-required modules
 RUN a2enmod rewrite
 
 WORKDIR /var/www/html
 
-# Copy app files from previous stages
+# Copy Laravel app
 COPY --from=vendor /app /var/www/html
 COPY --from=frontend /app/public/build ./public/build
 
-# Copy Apache virtual host config
+# Apache config
 COPY ./apache/laravel.conf /etc/apache2/sites-available/000-default.conf
 
-# Create SQLite database
+# SQLite database setup
 RUN mkdir -p database && touch database/database.sqlite && chmod 777 database/database.sqlite
 
-# Set permissions
+# Fix permissions
 RUN chown -R www-data:www-data storage bootstrap/cache database && chmod -R 775 storage bootstrap/cache database
 
-# Set up environment
+# Set environment variables
 ENV APP_ENV=production
 ENV APP_DEBUG=false
 ENV APP_URL=https://laravel-contact-manager.onrender.com
 ENV DB_CONNECTION=sqlite
 ENV DB_DATABASE=/var/www/html/database/database.sqlite
 
-# Ensure Laravel has an app key
-RUN php artisan key:generate --force
+# Cache configs (don’t run artisan key:generate yet)
+RUN php artisan config:clear || true && php artisan route:clear || true && php artisan view:clear || true
 
-# Cache routes/config/views for performance
-RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
-
+# Expose port
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+# On container start: generate key if missing, then start Apache
+CMD ["/bin/sh", "-c", "php artisan key:generate --force || true && php artisan migrate --force || true && apache2-foreground"]
