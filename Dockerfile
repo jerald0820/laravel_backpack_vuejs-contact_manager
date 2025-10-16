@@ -73,6 +73,6 @@ EXPOSE 80
 CMD ["/bin/sh", "-c", "\
     php artisan key:generate --force || true && \
     php artisan migrate --force || true && \
+    php artisan db:seed --class=AdminUserSeeder --force || true && \
     php artisan storage:link || true && \
-    php artisan backpack:user admin@admin.com --name=Admin --password=admin123 || true && \
     apache2-foreground"]
