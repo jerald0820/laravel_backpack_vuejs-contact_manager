@@ -64,5 +64,15 @@ RUN php artisan config:clear || true && php artisan route:clear || true && php a
 # Expose port
 EXPOSE 80
 
-# On container start: generate key if missing, then start Apache
-CMD ["/bin/sh", "-c", "php artisan key:generate --force || true && php artisan migrate --force || true && php artisan storage:link || true && apache2-foreground"]
+# On container start:
+# 1. Generate key (if missing)
+# 2. Run migrations
+# 3. Create Backpack admin user
+# 4. Link storage
+# 5. Start Apache
+CMD ["/bin/sh", "-c", "\
+    php artisan key:generate --force || true && \
+    php artisan migrate --force || true && \
+    php artisan storage:link || true && \
+    php artisan backpack:user admin@admin.com --name=Admin --password=admin123 || true && \
+    apache2-foreground"]
